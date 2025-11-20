@@ -24,11 +24,16 @@ export interface TopActionProps {
   tab?: SidebarTabKey;
 }
 
+//  TODO Change icons
 const TopActions = memo<TopActionProps>(({ tab, isPinned }) => {
   const { t } = useTranslation('common');
   const switchBackToChat = useGlobalStore((s) => s.switchBackToChat);
-  const { showMarket, enableKnowledgeBase } = useServerConfigStore(featureFlagsSelectors);
+  const { showMarket, enableKnowledgeBase, showAiImage } =
+    useServerConfigStore(featureFlagsSelectors);
   const hotkey = useUserStore(settingsSelectors.getHotkeyById(HotkeyEnum.NavigateToChat));
+
+  // Check if server mode is enabled
+  const isServerMode = process.env.NEXT_PUBLIC_SERVICE_MODE === 'server';
 
   const isChatActive = tab === SidebarTabKey.Chat && !isPinned;
   const isFilesActive = tab === SidebarTabKey.Files;
@@ -64,26 +69,28 @@ const TopActions = memo<TopActionProps>(({ tab, isPinned }) => {
           tooltipProps={{ placement: 'right' }}
         />
       </Link>
-      {enableKnowledgeBase && (
-        <Link aria-label={t('tab.files')} href={'/files'}>
+      {enableKnowledgeBase && isServerMode && (
+        <Link aria-label={t('tab.knowledgeBase')} href={'/knowledge'}>
           <ActionIcon
             active={isFilesActive}
             icon={FolderClosed}
             size={ICON_SIZE}
-            title={t('tab.files')}
+            title={t('tab.knowledgeBase')}
             tooltipProps={{ placement: 'right' }}
           />
         </Link>
       )}
-      <Link aria-label={t('tab.aiImage')} href={'/image'}>
-        <ActionIcon
-          active={isImageActive}
-          icon={Palette}
-          size={ICON_SIZE}
-          title={t('tab.aiImage')}
-          tooltipProps={{ placement: 'right' }}
-        />
-      </Link>
+      {showAiImage && (
+        <Link aria-label={t('tab.aiImage')} href={'/image'}>
+          <ActionIcon
+            active={isImageActive}
+            icon={Palette}
+            size={ICON_SIZE}
+            title={t('tab.aiImage')}
+            tooltipProps={{ placement: 'right' }}
+          />
+        </Link>
+      )}
       {showMarket && (
         <Link aria-label={t('tab.discover')} href={'/discover'}>
           <ActionIcon
